@@ -4,15 +4,13 @@ from PySide6.QtGui import QColor, QPen, QPainter
 
 from config import *
 
-from logo import LogoItem
+from logo import Logo
 
 
 class View(QGraphicsView):
     
-    def __init__(self, v_scene, parent=None):
-        super().__init__(parent)
-        
-        self.v_scene = v_scene
+    def __init__(self):
+        super().__init__()
 
         self.init_ui()
 
@@ -23,13 +21,24 @@ class View(QGraphicsView):
                             QPainter.SmoothPixmapTransform |  # 使图元变换更加平滑
                             QPainter.LosslessImageRendering)
         # 视窗更新模式
-        self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
-        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
-        self.setDragMode(QGraphicsView.RubberBandDrag)
+        self.setViewportUpdateMode(QGraphicsView.ViewportUpdateMode.FullViewportUpdate)
+        self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
+        self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
 
-        self.setScene(self.v_scene)
 
-        logo = LogoItem()
-        logo.setPos(SCENE_WIDTH/2 - logo.boundingRect().width()/2, BLOCK_WIDTH/2)
-        self.v_scene.addItem(logo)
+    # def keyPressEvent(self, event):
+    #     if event.key() == Qt.Key_Enter():
+    #         pass
+    #
+    # def mousePressEvent(self, event):
+    #     super().mousePressEvent(event)
+    #     if event.button() == Qt.LeftButton:
+    #         item = self.get_item_at_click(event)
+    #         if isinstance(item, LogoItem):
+    #             pass
+    #
+    # def get_item_at_click(self,event):
+    #     pos = event.pos()
+    #     item = self.itemAt(pos)
+    #     return item
 

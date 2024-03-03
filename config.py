@@ -1,5 +1,7 @@
 from PySide6.QtGui import QColor
 from paths import Paths
+from enum import IntEnum
+
 
 LOGO_RUN = Paths.icon('logo_run.png')
 LOGO_STOP = Paths.icon('logo_stop.png')
@@ -30,3 +32,9 @@ AREA_END_Y = VERTICAL_BLOCK_NUM - 2
 
 # 计时器间隔，用来控制贪吃蛇速度（间隔越小，移动越快）100~200
 INTERVAL = 150
+
+# 运行状态
+class Status(IntEnum):
+    RUN = 0
+    STOP = 1
+    READY = 2

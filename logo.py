@@ -2,13 +2,44 @@ from PySide6.QtWidgets import QGraphicsItem,QGraphicsPixmapItem
 from PySide6.QtGui import QPixmap
 
 from config import *
+from signals import Signals
 
-class LogoItem(QGraphicsPixmapItem):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.pix = QPixmap(LOGO_STOP)
-        # self.width = 64
-        # self.height = 64
-        self.setPixmap(self.pix)
-        self.setOpacity(0.8)
-        self.setFlag(QGraphicsItem.ItemIsSelectable)
+class Logo(QGraphicsPixmapItem):
+    def __init__(self):
+        super().__init__()
+
+        self.status = Status.READY
+        self.signals = Signals()
+
+        self.load_images()
+
+    def load_images(self):
+        self.run = QPixmap(LOGO_RUN)
+
+        self.stop = QPixmap(LOGO_STOP)
+
+    def turn_stop(self):
+        self.status = Status.STOP
+        self.setPixmap(self.stop)
+
+    def turn_run(self):
+        self.status = Status.RUN
+        self.setPixmap(self.run)
+
+    @property
+    def is_run(self):
+        return self.status == Status.RUN
+
+    def mousePressEvent(self, event):
+        self.signals.clicked.emit()
+        if not self.is_run:
+            self.turn_run()
+        else:
+            self.turn_stop()
+
+        print("logo-status: ", self.status)
+        super().mousePressEvent(event)
+
+
+
+
