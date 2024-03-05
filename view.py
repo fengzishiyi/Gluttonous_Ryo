@@ -26,6 +26,8 @@ class View(QGraphicsView):
         self.setDragMode(QGraphicsView.DragMode.RubberBandDrag)
 
 
+
+
     # def keyPressEvent(self, event):
     #     if event.key() == Qt.Key_Enter():
     #         pass

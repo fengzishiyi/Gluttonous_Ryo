@@ -8,10 +8,11 @@ class Logo(QGraphicsPixmapItem):
     def __init__(self):
         super().__init__()
 
-        self.status = Status.READY
+        self.status = Status.STOP
         self.signals = Signals()
 
         self.load_images()
+        self.setOpacity(0.8)
 
     def load_images(self):
         self.run = QPixmap(LOGO_RUN)
@@ -32,13 +33,16 @@ class Logo(QGraphicsPixmapItem):
 
     def mousePressEvent(self, event):
         self.signals.clicked.emit()
+        self.update_pix()
+        # super().mousePressEvent(event)
+
+    def update_pix(self):
         if not self.is_run:
             self.turn_run()
         else:
             self.turn_stop()
 
-        print("logo-status: ", self.status)
-        super().mousePressEvent(event)
+        # print("logo-status: ", self.status)
 
 
 

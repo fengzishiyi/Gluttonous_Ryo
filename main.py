@@ -1,28 +1,34 @@
 import sys
 import time
 
-from PySide6.QtWidgets import QApplication,QGraphicsScene,QGraphicsView
+from PySide6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsSimpleTextItem
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QMainWindow
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QFont
 
 from config import *
 
 from scene import Scene
 from view import View
 from logo import Logo
-from clock import Clock
+from snake import Snake
+from bood import Bood
+from nood import Nood
+from kood import Kood
+from sound import AudioSource
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.status = Status.READY
-        self.time_cnt = 0
+        self.status = Status.STOP
+        self.time = 0
+        self.point = 0
 
-        view = View()
         self.scene = Scene()
+        view = View()
+
 
         view.setScene(self.scene)
 
@@ -30,16 +36,50 @@ class MainWindow(QMainWindow):
         self.scene.addItem(self.logo)
         self.logo.turn_stop()
         self.logo.signals.clicked.connect(self.trigger)
-        self.logo.setPos(500,0)
+        self.logo.setPos(SCENE_WIDTH/2 - self.logo.boundingRect().width()/2, BLOCK_WIDTH/2)
 
-        self.clock = Clock()
+        self.clock = QGraphicsSimpleTextItem()
+        self.score = QGraphicsSimpleTextItem()
+
+        f = self.font()
+        f.setPointSize(24)
+        f.setWeight(QFont.Weight.Normal)
+
+        self.clock.setFont(f)
+        self.score.setFont(f)
+        self.clock.setOpacity(0.3)
+        self.score.setOpacity(0.3)
+        self.clock.setText('time: 000')
+        self.score.setText('score: 000')
         self.scene.addItem(self.clock)
-        self.clock.setPos(20,20)
+        self.scene.addItem(self.score)
+        self.clock.setPos(35, 30)
+        self.score.setPos(220, 30)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_timer)
         self.timer.start(1000)
 
+        self.audio = AudioSource()
+
+        self.snake = Snake(self)
+        self.snake.init_snake()
+        self.snake.signals.eat.connect(
+            self.audio.define
+        )
+        self.dir_temp = self.snake.dir
+
+        self.speed = QTimer(self)
+        self.speed.timeout.connect(self.update_game)
+        self.speed.start(INTERVAL)
+
+        self.food_pos_list = [0] * 3
+        self.bood = Bood(self)
+        self.nood = Nood(self)
+        self.kood = Kood(self)
+        self.bood.spawn()
+        self.nood.spawn()
+        self.kood.spawn()
 
         self.setGeometry(160, 50, SCENE_WIDTH + 5, SCENE_HEIGHT + 5)
         self.setFixedSize(self.width(), self.height())
@@ -47,29 +87,74 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Gluttonous_Ryo')
         self.show()
 
-    def update_timer(self):
-        if self.status == Status.RUN:
-            n_secs = self.time_cnt - 0
-            print('time: ', n_secs)
-            self.time_cnt += 1
-            self.clock.setText("time: %03d" % n_secs)
-
 
     def trigger(self, *args):
-        if self.status == Status.READY:
-            # First click.
-            self.update_status(Status.RUN)
-            # Start timer.
-        elif self.status == Status.STOP:
+        if self.status == Status.STOP:
             self.update_status(Status.RUN)
             self.timer.start()
         elif self.status == Status.RUN:
             self.update_status(Status.STOP)
             self.timer.stop()
 
+    def update_game(self):
+        if self.status == Status.RUN:
+            self.snake.dir = self.dir_temp
+            # print('snake.dir',self.snake.dir)
+            self.snake.move()
+            self.update_score()
+
+    def update_score(self):
+        if self.status == Status.RUN:
+            # print('score: ', self.point)
+            self.score.setText("score: %03d" % self.point)
+
+
+    def update_timer(self):
+        if self.status == Status.RUN:
+            # print('time: ', self.time)
+            self.time += 1
+            self.clock.setText("time: %03d" % self.time)
+
     def update_status(self, status):
         self.status = status
-        print('main-status: ',self.status)
+        # print('main-status: ',self.status)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key.Key_Space:
+            self.logo.signals.clicked.emit()
+            self.logo.update_pix()
+            return
+        if self.status == Status.RUN:
+            if event.key() == Qt.Key.Key_W and self.snake.dir != 'down':
+                self.dir_temp = 'up'
+            elif event.key() == Qt.Key.Key_S and self.snake.dir != 'up':
+                self.dir_temp = 'down'
+            elif event.key() == Qt.Key.Key_A and self.snake.dir != 'right':
+                self.dir_temp = 'left'
+            elif event.key() == Qt.Key.Key_D and self.snake.dir != 'left':
+                self.dir_temp = 'right'
+            # print('dir_temp', self.dir_temp)
+        if event.key() == Qt.Key_R and self.status == Status.FAILED:
+            self.restart()
+
+    def lose(self):
+        self.update_status(Status.FAILED)
+        self.timer.stop()
+
+    def restart(self):
+        self.status = Status.STOP
+        self.logo.turn_stop()
+        self.snake.init_snake()
+        self.dir_temp = self.snake.dir
+        self.bood.spawn()
+        self.nood.spawn()
+        self.kood.spawn()
+        self.time = 0
+        self.point = 0
+        self.clock.setText('time: 000')
+        self.score.setText('score: 000')
+        self.timer.start()
+        # print('restart')
 
 
 app = QApplication(sys.argv)
