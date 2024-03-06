@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
 
         self.clock = QGraphicsSimpleTextItem()
         self.score = QGraphicsSimpleTextItem()
+        self.speed_l = QGraphicsSimpleTextItem()
 
         f = self.font()
         f.setPointSize(24)
@@ -47,14 +48,19 @@ class MainWindow(QMainWindow):
 
         self.clock.setFont(f)
         self.score.setFont(f)
+        self.speed_l.setFont(f)
         self.clock.setOpacity(0.3)
         self.score.setOpacity(0.3)
+        self.speed_l.setOpacity(0.3)
         self.clock.setText('time: 000')
         self.score.setText('score: 000')
+        self.speed_l.setText('speed: 50')
         self.scene.addItem(self.clock)
         self.scene.addItem(self.score)
+        self.scene.addItem(self.speed_l)
         self.clock.setPos(35, 30)
-        self.score.setPos(220, 30)
+        self.score.setPos(205, 30)
+        self.speed_l.setPos(390, 30)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_timer)
@@ -65,7 +71,7 @@ class MainWindow(QMainWindow):
         self.snake = Snake(self)
         self.snake.init_snake()
         self.snake.signals.eat.connect(
-            self.audio.define
+            self.update_eat
         )
         self.dir_temp = self.snake.dir
 
@@ -87,6 +93,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('Gluttonous_Ryo')
         self.show()
 
+    def update_eat(self, i, j):
+        self.audio.play_audio(i, j)
+        self.snake.do_pills(i, j)
 
     def trigger(self, *args):
         if self.status == Status.STOP:
@@ -102,6 +111,7 @@ class MainWindow(QMainWindow):
             # print('snake.dir',self.snake.dir)
             self.snake.move()
             self.update_score()
+            self.update_speed()
 
     def update_score(self):
         if self.status == Status.RUN:
@@ -118,6 +128,11 @@ class MainWindow(QMainWindow):
     def update_status(self, status):
         self.status = status
         # print('main-status: ',self.status)
+
+    def update_speed(self):
+        if self.status == Status.RUN:
+            self.speed_l.setText("speed: %d" % (200 - self.snake.speed))
+            self.speed.setInterval(self.snake.speed)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Space:
@@ -155,6 +170,8 @@ class MainWindow(QMainWindow):
         self.score.setText('score: 000')
         self.timer.start()
         # print('restart')
+
+
 
 
 app = QApplication(sys.argv)

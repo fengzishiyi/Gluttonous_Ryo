@@ -34,15 +34,22 @@ NOOD_COLOR = QColor('#E9EA68')
 KOOD_COLOR = QColor('#D6304A')
 
 
-BOOD_SOUND = {
-    'i_found_pills': Paths.sound('i_found_pills.wav')
-}
-NOOD_SOUND = {
-    'range_up': Paths.sound('range_up.wav')
-}
-KOOD_SOUND = {
-    'speed_up': Paths.sound('speed_up.wav')
-}
+BOOD_SOUND = [
+    Paths.sound('the_fool.wav'),
+    Paths.sound('wrong.wav'),
+]
+NOOD_SOUND = [
+    Paths.sound('the_sun.wav'),
+]
+KOOD_SOUND = [
+    Paths.sound('speed_up.wav'),
+    Paths.sound('speed_down.wav'),
+    Paths.sound('the_lovers.wav'),
+]
+
+LEN_BOOD = len(BOOD_SOUND)
+LEN_NOOD = len(NOOD_SOUND)
+LEN_KOOD = len(KOOD_SOUND)
 
 # 规定贪吃蛇可移动区域的起始和结束坐标,黑边，方块左上角坐标 （1~38，1~22）
 AREA_START_X = 1

@@ -16,9 +16,11 @@ class Snake(QObject):
         self.color_list = [BLOCK_COLOR, BLOCK_COLOR, BLOCK_COLOR]
         self.snake_items_list = []
         self.signals = Signals()
+        self.speed = INTERVAL
         
     def init_snake(self):
         self.pos_list = []
+        self.speed = INTERVAL
         self.color_list = [BLOCK_COLOR, BLOCK_COLOR, BLOCK_COLOR]
 
         x, y = self.get_random_pos()
@@ -101,15 +103,15 @@ class Snake(QObject):
                 if head_pos == self.game.food_pos_list[0]:
                     self.game.bood.spawn()
                     self.color_list.append(BOOD_COLOR)
-                    self.signals.eat.emit(0, 'i_found_pills')
+                    self.signals.eat.emit(0, random.randint(0,LEN_BOOD-1))
                 elif head_pos == self.game.food_pos_list[1]:
                     self.game.nood.spawn()
                     self.color_list.append(NOOD_COLOR)
-                    self.signals.eat.emit(1, 'range_up')
+                    self.signals.eat.emit(1, random.randint(0,LEN_NOOD-1))
                 elif head_pos == self.game.food_pos_list[2]:
                     self.game.kood.spawn()
                     self.color_list.append(KOOD_COLOR)
-                    self.signals.eat.emit(2, 'speed_up')
+                    self.signals.eat.emit(2, random.randint(0,LEN_KOOD-1))
 
             self.draw_snake(self.pos_list)
 
@@ -123,3 +125,25 @@ class Snake(QObject):
         if head_pos[0] < AREA_START_X or head_pos[0] > AREA_END_X or \
                 head_pos[1] < AREA_START_Y or head_pos[1] > AREA_END_Y:
             self.game.lose()
+
+    def do_pills(self, i, j):
+        if i == 0:
+            if j == 0:
+                self.color_list = [BOOD_COLOR] * len(self.color_list)
+            if j == 1:
+                colors = [BOOD_COLOR,NOOD_COLOR,KOOD_COLOR,BLOCK_COLOR]
+                n = len(self.color_list)
+                self.color_list = []
+                for i in range(n):
+                    self.color_list.append(colors[random.randint(0,3)])
+        elif i == 1:
+            if j == 0:
+                self.color_list = [NOOD_COLOR] * len(self.color_list)
+
+        else:
+            if j == 0:
+                self.speed = max(100,(self.speed - 30))
+            elif j == 1:
+                self.speed = min(190,(self.speed + 30))
+            elif j == 2:
+                self.color_list = [KOOD_COLOR] * len(self.color_list)
