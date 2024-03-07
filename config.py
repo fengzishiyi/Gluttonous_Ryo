@@ -37,14 +37,23 @@ KOOD_COLOR = QColor('#D6304A')
 BOOD_SOUND = [
     Paths.sound('the_fool.wav'),
     Paths.sound('wrong.wav'),
+    Paths.sound('paralysis.wav'),
+    Paths.sound('luck_down.wav'),
+    Paths.sound('i_found_pills.wav'),
 ]
 NOOD_SOUND = [
     Paths.sound('the_sun.wav'),
+    Paths.sound('excited.wav'),
+    Paths.sound('luck_up.wav'),
+    Paths.sound('i_found_pills.wav'),
+
 ]
 KOOD_SOUND = [
     Paths.sound('speed_up.wav'),
     Paths.sound('speed_down.wav'),
     Paths.sound('the_lovers.wav'),
+    Paths.sound('drowsy.wav'),
+    Paths.sound('i_found_pills.wav'),
 ]
 
 LEN_BOOD = len(BOOD_SOUND)

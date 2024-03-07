@@ -1,6 +1,8 @@
 import sys
 import time
 
+# pyinstaller --windowed --add-data "icons:icons" --add-data "sounds:sounds" -n "Gluttonous_Ryo" -i D:\my_python\Gluttonous_Ryo\icons\icon32.ico main.py
+
 from PySide6.QtWidgets import QApplication, QGraphicsScene, QGraphicsView, QGraphicsSimpleTextItem
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QMainWindow
@@ -17,11 +19,18 @@ from nood import Nood
 from kood import Kood
 from sound import AudioSource
 
+try:
+    from ctypes import windll # Only exists on Windows.
+    myappid = "FengZiShiYi"
+    windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+except ImportError:
+    pass
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.luck = 3
         self.status = Status.STOP
         self.time = 0
         self.point = 0
@@ -91,11 +100,13 @@ class MainWindow(QMainWindow):
         self.setFixedSize(self.width(), self.height())
         self.setCentralWidget(view)
         self.setWindowTitle('Gluttonous_Ryo')
+        self.setWindowIcon(QIcon(Paths.icon('icon64.ico')))
         self.show()
 
     def update_eat(self, i, j):
-        self.audio.play_audio(i, j)
-        self.snake.do_pills(i, j)
+        if self.time % self.luck == 0:
+            self.snake.do_pills(i, j)
+            self.audio.play_audio(i, j)
 
     def trigger(self, *args):
         if self.status == Status.STOP:
@@ -131,7 +142,10 @@ class MainWindow(QMainWindow):
 
     def update_speed(self):
         if self.status == Status.RUN:
-            self.speed_l.setText("speed: %d" % (200 - self.snake.speed))
+            if self.snake.speed > 200:
+                self.speed_l.setText("speed: 0")
+            else:
+                self.speed_l.setText("speed: %d" % (200 - self.snake.speed))
             self.speed.setInterval(self.snake.speed)
 
     def keyPressEvent(self, event):
@@ -170,6 +184,22 @@ class MainWindow(QMainWindow):
         self.score.setText('score: 000')
         self.timer.start()
         # print('restart')
+
+    def excited(self):
+        self.snake.speed = 30
+        QTimer.singleShot(6000, self.recover)
+
+    def paralysis(self):
+        self.snake.speed = 10000
+        QTimer.singleShot(3000, self.recover)
+
+    def drowsy(self):
+        self.snake.speed = 500
+        QTimer.singleShot(12000, self.recover)
+
+    def recover(self):
+        self.snake.speed = INTERVAL
+
 
 
 

@@ -17,35 +17,35 @@ class Snake(QObject):
         self.snake_items_list = []
         self.signals = Signals()
         self.speed = INTERVAL
-        
+
     def init_snake(self):
         self.pos_list = []
         self.speed = INTERVAL
         self.color_list = [BLOCK_COLOR, BLOCK_COLOR, BLOCK_COLOR]
 
         x, y = self.get_random_pos()
-        self.pos_list.append([x,y])
+        self.pos_list.append([x, y])
 
         while True:
-            num = random.randint(1,4)
-            if num == 1 and x-2 >= AREA_START_X:
-                self.pos_list.append([x-1, y])
-                self.pos_list.append([x-2, y])
+            num = random.randint(1, 4)
+            if num == 1 and x - 2 >= AREA_START_X:
+                self.pos_list.append([x - 1, y])
+                self.pos_list.append([x - 2, y])
                 self.dir = 'right'
                 break
-            elif num == 2 and x+2 <= AREA_END_X:    # 蛇身朝右，向左移动
-                self.pos_list.append([x+1, y])
-                self.pos_list.append([x+2, y])
+            elif num == 2 and x + 2 <= AREA_END_X:  # 蛇身朝右，向左移动
+                self.pos_list.append([x + 1, y])
+                self.pos_list.append([x + 2, y])
                 self.dir = 'left'
                 break
-            elif num == 3 and y-2 >= AREA_START_Y:  # 蛇身朝上，向下移动
-                self.pos_list.append([x, y-1])
-                self.pos_list.append([x, y-2])
+            elif num == 3 and y - 2 >= AREA_START_Y:  # 蛇身朝上，向下移动
+                self.pos_list.append([x, y - 1])
+                self.pos_list.append([x, y - 2])
                 self.dir = 'down'
                 break
-            elif num == 4 and y+2 <= AREA_END_Y:    # 蛇身朝下，向上移动
-                self.pos_list.append([x, y+1])
-                self.pos_list.append([x, y+2])
+            elif num == 4 and y + 2 <= AREA_END_Y:  # 蛇身朝下，向上移动
+                self.pos_list.append([x, y + 1])
+                self.pos_list.append([x, y + 2])
                 self.dir = 'up'
                 break
 
@@ -94,7 +94,7 @@ class Snake(QObject):
         self.check_collision(head_pos)
 
         if self.game.status == Status.RUN:
-            self.pos_list.insert(0,head_pos)
+            self.pos_list.insert(0, head_pos)
 
             if head_pos not in self.game.food_pos_list:
                 self.pos_list.pop()
@@ -103,18 +103,17 @@ class Snake(QObject):
                 if head_pos == self.game.food_pos_list[0]:
                     self.game.bood.spawn()
                     self.color_list.append(BOOD_COLOR)
-                    self.signals.eat.emit(0, random.randint(0,LEN_BOOD-1))
+                    self.signals.eat.emit(0, random.randint(0, LEN_BOOD - 1))
                 elif head_pos == self.game.food_pos_list[1]:
                     self.game.nood.spawn()
                     self.color_list.append(NOOD_COLOR)
-                    self.signals.eat.emit(1, random.randint(0,LEN_NOOD-1))
+                    self.signals.eat.emit(1, random.randint(0, LEN_NOOD - 1))
                 elif head_pos == self.game.food_pos_list[2]:
                     self.game.kood.spawn()
                     self.color_list.append(KOOD_COLOR)
-                    self.signals.eat.emit(2, random.randint(0,LEN_KOOD-1))
+                    self.signals.eat.emit(2, random.randint(0, LEN_KOOD - 1))
 
             self.draw_snake(self.pos_list)
-
 
     def check_collision(self, head_pos):
         for i, pos in enumerate(self.pos_list):
@@ -130,20 +129,31 @@ class Snake(QObject):
         if i == 0:
             if j == 0:
                 self.color_list = [BOOD_COLOR] * len(self.color_list)
-            if j == 1:
-                colors = [BOOD_COLOR,NOOD_COLOR,KOOD_COLOR,BLOCK_COLOR]
+            elif j == 1:
+                colors = [BOOD_COLOR, NOOD_COLOR, KOOD_COLOR, BLOCK_COLOR]
                 n = len(self.color_list)
                 self.color_list = []
                 for i in range(n):
-                    self.color_list.append(colors[random.randint(0,3)])
+                    self.color_list.append(colors[random.randint(0, 3)])
+            elif j == 2:
+                self.game.paralysis()
+            elif j == 3:
+                self.game.luck = min(5, self.game.luck + 1)
+
         elif i == 1:
             if j == 0:
                 self.color_list = [NOOD_COLOR] * len(self.color_list)
+            elif j == 1:
+                self.game.excited()
+            elif j == 2:
+                self.game.luck = max(1, self.game.luck - 1)
 
         else:
             if j == 0:
-                self.speed = max(100,(self.speed - 30))
+                self.speed = max(100, (self.speed - 30))
             elif j == 1:
-                self.speed = min(190,(self.speed + 30))
+                self.speed = min(190, (self.speed + 30))
             elif j == 2:
                 self.color_list = [KOOD_COLOR] * len(self.color_list)
+            elif j == 3:
+                self.game.drowsy()
